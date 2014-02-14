@@ -137,7 +137,7 @@ object Knapsack {
   def sumWeight(items: Traversable[KnapsackItem]) = items.foldLeft(0){ _ + _.weight}
 
   /**
-   * 0/1 Knapsack algorithm see: http://en.wikipedia.org/wiki/Knapsack_problem
+   * Modified 0/1 Knapsack algorithm see: http://en.wikipedia.org/wiki/Knapsack_problem
    */
   def calculate(items: Seq[KnapsackItem], maxWeight: Int):Knapsack = {
 

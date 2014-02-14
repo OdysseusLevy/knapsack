@@ -1,4 +1,3 @@
-package
 /**
  * Using a modified knapsack algorithm, prints out the most likely states to cause a tie. States printed out are assumed
  * to have gone to the Democrats all other states are assumed to have gone to the Republicans.

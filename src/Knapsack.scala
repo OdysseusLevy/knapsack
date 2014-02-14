@@ -1,5 +1,4 @@
 import scala.collection.immutable.TreeSet
-import scala.collection.{SetLike, SortedSet}
 
 /**
  * Knapsack algorithm modified to track multiple probabilities for each weight.
@@ -38,7 +37,7 @@ case class ItemGroup(values: Set[KnapsackItem]) {
 object ItemSetOrdering extends Ordering[ItemGroup] {
 
   // Note: reversed to ensure that high numbers come first
-  override def compare(a: ItemGroup, b: ItemGroup): Int = {
+   override def compare(a: ItemGroup, b: ItemGroup): Int = {
     if (a.probability < b.probability)
       1
     else if (a.probability == b.probability)
@@ -46,7 +45,6 @@ object ItemSetOrdering extends Ordering[ItemGroup] {
     else
       -1
   }
-
 }
 
 /**
@@ -58,8 +56,11 @@ object KnapsackData {
 
   val MaxValues = 20 // Only keep track of this many values (otherwise we could easily use up too much memory)
 
-  def apply(): KnapsackData = {
-    new KnapsackData(new TreeSet[ItemGroup]()(ItemSetOrdering))
+  def apply(): KnapsackData = new KnapsackData(TreeSet.empty(ItemSetOrdering))
+
+  def apply(groups: Traversable[ItemGroup]): KnapsackData = {
+    val set = TreeSet(groups.toSeq:_*)(ItemSetOrdering)
+    new KnapsackData(set)
   }
 
   def limit(values: TreeSet[ItemGroup]): TreeSet[ItemGroup] = {
@@ -69,7 +70,7 @@ object KnapsackData {
 
 class KnapsackData (val values: TreeSet[ItemGroup]) {
 
-  import KnapsackData.limit
+  import KnapsackData._
 
   def add(data: KnapsackData): KnapsackData = {
     new KnapsackData(limit(values ++ data.values))
@@ -89,9 +90,8 @@ class KnapsackData (val values: TreeSet[ItemGroup]) {
    * NOTE: If we have hit our size limit we return only the highest value groups.
    */
   def insert(newItem: KnapsackItem): KnapsackData = {
-    val newValues = values.map { item: ItemGroup => ItemGroup( item + newItem) }
-    val tree = TreeSet[ItemGroup](newValues.toSeq:_*)(ItemSetOrdering)
-    new KnapsackData(limit( tree ) )
+      val newValues = values.map { item: ItemGroup => ItemGroup( item + newItem) }.take(MaxValues)
+      KnapsackData(newValues)
   }
 
   override def toString(): String = {

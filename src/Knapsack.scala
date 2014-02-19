@@ -50,17 +50,18 @@ object ItemSetOrdering extends Ordering[ItemGroup] {
 /**
  * Immutable
  *
- * Represents all possible KnapsackItem combinations for a particular Knapsack matrix cell up to our limit
+ * Represents the data for one cell in the Knapsack grid
+ * It contains all possible KnapsackItem combinations up to our limit
  */
-object KnapsackData {
+object KnapsackCell {
 
   val MaxValues = 20 // Only keep track of this many values (otherwise we could easily use up too much memory)
 
-  def apply(): KnapsackData = new KnapsackData(TreeSet.empty(ItemSetOrdering))
+  def apply(): KnapsackCell = new KnapsackCell(TreeSet.empty(ItemSetOrdering))
 
-  def apply(groups: Traversable[ItemGroup]): KnapsackData = {
+  def apply(groups: Traversable[ItemGroup]): KnapsackCell = {
     val set = TreeSet(groups.toSeq:_*)(ItemSetOrdering)
-    new KnapsackData(set)
+    new KnapsackCell(set)
   }
 
   def limit(values: TreeSet[ItemGroup]): TreeSet[ItemGroup] = {
@@ -68,16 +69,16 @@ object KnapsackData {
   }
 }
 
-class KnapsackData (val values: TreeSet[ItemGroup]) {
+class KnapsackCell (val values: TreeSet[ItemGroup]) {
 
-  import KnapsackData._
+  import KnapsackCell._
 
-  def add(data: KnapsackData): KnapsackData = {
-    new KnapsackData(limit(values ++ data.values))
+  def add(data: KnapsackCell): KnapsackCell = {
+    new KnapsackCell(limit(values ++ data.values))
   }
 
-  def add(item: KnapsackItem): KnapsackData = {
-    new KnapsackData(values + ItemGroup(Set(item)))
+  def add(item: KnapsackItem): KnapsackCell = {
+    new KnapsackCell(values + ItemGroup(Set(item)))
   }
 
   /**
@@ -89,9 +90,9 @@ class KnapsackData (val values: TreeSet[ItemGroup]) {
    *
    * NOTE: If we have hit our size limit we return only the highest value groups.
    */
-  def insert(newItem: KnapsackItem): KnapsackData = {
+  def insert(newItem: KnapsackItem): KnapsackCell = {
       val newValues = values.map { item: ItemGroup => ItemGroup( item + newItem) }.take(MaxValues)
-      KnapsackData(newValues)
+      KnapsackCell(newValues)
   }
 
   override def toString(): String = {
@@ -114,16 +115,16 @@ class KnapsackData (val values: TreeSet[ItemGroup]) {
  */
 class Knapsack(numItems: Int, weight: Int ) {
 
-  private val grid = Array.ofDim[KnapsackData](numItems, weight + 1)
+  private val grid = Array.ofDim[KnapsackCell](numItems, weight + 1)
 
-  def apply(itemNum: Int, weight: Int): KnapsackData = {
+  def apply(itemNum: Int, weight: Int): KnapsackCell = {
     if (grid(itemNum)(weight) == null) {
-      grid(itemNum)(weight) = KnapsackData()
+      grid(itemNum)(weight) = KnapsackCell()
     }
     grid(itemNum)(weight)
   }
 
-  def update(itemNum: Int, weight: Int, value: KnapsackData) = {
+  def update(itemNum: Int, weight: Int, value: KnapsackCell) = {
     grid(itemNum)(weight) = value
   }
   
